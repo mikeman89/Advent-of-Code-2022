@@ -1,3 +1,4 @@
+from functools import reduce
 from typing import Callable, Iterator
 
 
@@ -18,10 +19,10 @@ class Monkey:
         while self.items:
             self.inspect_count += 1
             worry = self.operation(self.items.pop(0)) // self.worry_divisor
-            if worry % self.test == 0:
-                yield (self.iftrue, worry)
+            if worry % self.test:
+                yield self.iffalse, worry % 9_699_690 if self.worry_divisor == 1 else worry
             else:
-                yield (self.iffalse, worry)
+                yield self.iftrue, worry
 
 
 def parse(raw: str, worry_divisor: int) -> list[Monkey]:
@@ -35,8 +36,23 @@ def play_a_round(monkeys: list[Monkey]) -> list[Monkey]:
     return monkeys
 
 
+def play_a_game(monkeys: list[Monkey], rounds: int) -> int:
+    for _ in range(rounds):
+        monkeys = play_a_round(monkeys)
+
+    inspect_sorted: list[int] = sorted(
+        [monkey.inspect_count for monkey in monkeys], reverse=True
+    )
+
+    return inspect_sorted[0] * inspect_sorted[1]
+
+
 def main() -> None:
-    pass
+    with open("day11/day11.txt", "r", encoding="UTF-8") as file_data:
+        raw = file_data.read()
+    monkeys = parse(raw, 1)
+    game_points = play_a_game(monkeys, 10_000)
+    print(game_points)
 
 
 if __name__ == "__main__":
