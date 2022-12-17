@@ -1,3 +1,4 @@
+# pylint: disable=missing-class-docstring,missing-function-docstring,missing-module-docstring
 from itertools import count
 
 Point = tuple[int, int]
@@ -32,7 +33,7 @@ def make_world(paths: list[Path]) -> World:
 
 def simulate_sand(paths: list[Path], entry_x: int = 500) -> int:
     world: World = make_world(paths)
-    bottom = max(y for x, y in world)
+    bottom = max(y for _, y in world)
     for i in count():
         x, y = entry_x, 0
         while True:
@@ -58,10 +59,10 @@ def simulate_sand(paths: list[Path], entry_x: int = 500) -> int:
 
 
 def show_world(world: World) -> None:
-    min_x = min(x for x, y in world)
-    min_y = min(y for x, y in world)
-    max_x = max(x for x, y in world)
-    max_y = max(y for x, y in world)
+    min_x = min(x for x, _ in world)
+    min_y = min(y for _, y in world)
+    max_x = max(x for x, _ in world)
+    max_y = max(y for _, y in world)
 
     for y in range(min_y, max_y + 1):
         for x in range(min_x, max_x + 1):
@@ -72,7 +73,7 @@ def show_world(world: World) -> None:
 def simulate_sand2(paths: list[Path], entry_x: int = 500) -> int:
     world: World = make_world(paths)
     # bottom behaves differently for part 2
-    bottom = max(y for x, y in world) + 1
+    bottom = max(y for _, y in world) + 1
     for i in count(1):
 
         x, y = entry_x, 0

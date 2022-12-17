@@ -1,7 +1,10 @@
+# pylint: disable=missing-class-docstring,missing-function-docstring,missing-module-docstring
+
 from functools import cmp_to_key
 from itertools import zip_longest
+from typing import Any
 
-Packet = list
+Packet = list[Any]
 Pair = tuple[Packet, Packet]
 
 
