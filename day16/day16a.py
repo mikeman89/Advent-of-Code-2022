@@ -36,7 +36,7 @@ class Network:
             remaining_steps -= 1
         return tot
 
-    def most_pressure(self, num_steps: int = 26, start: str = "AA") -> int:
+    def most_pressure(self, num_steps: int = 30, start: str = "AA") -> int:
         valves_with_flow = {v.name for v in self.valves if v.flow_rate > 0}
 
         best_possible = self.best_possible(0, num_steps, set())
@@ -95,7 +95,7 @@ def parse(lines: list[str]) -> Network:
 
 
 def main() -> None:
-    with open("day16/test_day16.txt", "r", encoding="UTF-8") as file_data:
+    with open("day16/day16.txt", "r", encoding="UTF-8") as file_data:
         lines = file_data.readlines()
     network = parse(lines)
     print(network.most_pressure(30, "AA"))
