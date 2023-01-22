@@ -1,0 +1,4 @@
+disable=
+    C0114, # missing-module-docstring
+    C0115 # missing-class-doctring
+    C0115 # missing-function-doctring
