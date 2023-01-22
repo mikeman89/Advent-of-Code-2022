@@ -23,6 +23,10 @@ class Rock:
         bx, by = self.bottom_left
         return Rock((bx + dx, by + dy), self.offsets)
 
+    def height(self) -> int:
+        _, by = self.bottom_left
+        return max([y + by for _, y in self.offsets])
+
 
 OFFSETS = {
     # positive x is right positive y is up
@@ -80,18 +84,18 @@ def run(pattern: str) -> Iterator[dict[str, int | bool | None]]:
             # hit the floor or other rocks
             if any(y <= 0 for _, y in points) or (points & occupied):
                 # add all points to the occupied set
-                occupied = occupied | rock.points()
+                occupied |= rock.points()
 
-                height = max(height, max(y for _, y in occupied))
+                height = max(height, rock.height())
                 # check for a full line
                 line: list[int] = []
-                for _, y in points:
+                for _, y in rock.points():
                     if all((x, y) in occupied for x in range(1, 8)):
                         line.append(y)
                 if line:
                     h = max(line)
                     # reset to 0
-                    occupied = {(x, y - h) for x, y in occupied if y > h}
+                    occupied = set((x, y - h) for x, y in occupied if y > h)
                     deleted += h
                     height -= h
 
