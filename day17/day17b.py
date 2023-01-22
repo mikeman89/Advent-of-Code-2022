@@ -1,5 +1,9 @@
 from dataclasses import dataclass
 from itertools import cycle
+from typing import Iterator
+
+import pandas as pd
+import tqdm
 
 XY = tuple[int, int]
 
@@ -35,18 +39,18 @@ OFFSETS = {
 # piece starts at (3, h) for whatever h
 
 
-def run(pattern: str, num_steps: int) -> int:
+def run(pattern: str) -> Iterator[dict[str, int | bool | None]]:
     """return the height of the tallest rock adfter num_steps"""
     occupied: set[XY] = set()
     gasses = cycle(pattern)
     num_rocks = 0
+    height = 0
+    h = 0
+    deleted = 0
 
     for rock_type in cycle(OFFSETS):
-        if num_rocks >= num_steps:
-            return max(y for x, y in occupied)
-        else:
-            num_rocks += 1
-        floor = max(y for x, y in occupied) if occupied else 0
+        num_rocks += 1
+        floor = max(y for _, y in occupied) if occupied else 0
         bottom_left = (3, floor + 4)
         rock = Rock(bottom_left, OFFSETS[rock_type])
 
@@ -62,8 +66,8 @@ def run(pattern: str, num_steps: int) -> int:
             moved_rock = rock.move(dx, dy)
             points = moved_rock.points()
             if (
-                any(x <= 0 for x, y in points)
-                or any(x >= 8 for x, y in points)
+                any(x <= 0 for x, _ in points)
+                or any(x >= 8 for x, _ in points)
                 or (points & occupied)
             ):
                 # hit another rock or wall
@@ -73,21 +77,41 @@ def run(pattern: str, num_steps: int) -> int:
             # try to fall
             moved_rock = rock.move(0, -1)
             points = moved_rock.points()
-            if any(y <= 0 for x, y in points) or (points & occupied):
+            # hit the floor or other rocks
+            if any(y <= 0 for _, y in points) or (points & occupied):
                 # add all points to the occupied set
                 occupied = occupied | rock.points()
+
+                height = max(height, max(y for _, y in occupied))
+                # check for a full line
+                line: list[int] = []
+                for _, y in points:
+                    if all((x, y) in occupied for x in range(1, 8)):
+                        line.append(y)
+                if line:
+                    h = max(line)
+                    # reset to 0
+                    occupied = {(x, y - h) for x, y in occupied if y > h}
+                    deleted += h
+                    height -= h
+
+                yield {
+                    "height": height + deleted,
+                    "time": num_rocks,
+                    "line_completed": bool(line),
+                    "delta": h if line else None,
+                }
+
                 break  # out of while loop
             else:
                 rock = moved_rock
 
 
-def main():
-    with open("day17/day17.txt", "r", encoding="UTF-8") as data:
-        gasses = data.read()
+# with open("day17/test_day17.txt", "r", encoding="UTF-8") as data:
+#     gasses = data.read()
 
-    max_height: int = run(gasses, 2022)
-    print(max_height)
+gasses = ">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>"
 
+it = run(gasses)
 
-if __name__ == "__main__":
-    main()
+df = pd.DataFrame([next(it) for _ in tqdm.trange(10_000)])
